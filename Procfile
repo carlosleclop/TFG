@@ -1,1 +1,1 @@
-gunicorn transitweb_project.wsgi --log-file -
+web: gunicorn transitweb_project.wsgi --log-file -
