@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Register{% endblock %}
+
+{% block body_block %}
+
+<div class="page-header">
+
+{% if user.is_authenticated %}
+<h1> Register {{ user.username }} </h1>
+{% else %}
+<h1> Register new observer </h1>
+{% endif %}
+</div>
+
+{% if registered %}
+Registered!
+{% else %}
+
+<form id="user_form" method="post" class="form-horizontal" action="/accounts/register/">
+
+{% csrf_token %}
+{{ user_form.as_p }}
+{{ profile_form.as_p }}
+
+<input type="submit" name="submit" value="Register" />
+
+</form>
+
+{% endif %}
+{% endblock %}

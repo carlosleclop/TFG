@@ -1,0 +1,35 @@
+{% extends 'accounts/base_profile.html' %}
+
+{% load staticfiles %}
+
+{% block profile_panel_telescope %}
+
+  <div class="panel panel-info">
+   <div class="panel-heading">
+    <h3 class="panel-title">Telescopes</h3>
+   </div>
+   <div class="panel-body">
+
+     {% if userObserver.telescope_set %}
+     {% for telescope in userObserver.telescope_set.all %}
+     <div class="panel panel-info">
+      <div class="panel-body">
+       <p>Mobile telescope: {{ telescope.mobile }}</p>
+       <p>Country: {{ telescope.country }}</p>
+       <p>Latitude of telescope: {{ telescope.latitude }}  </p>
+       <p>Longitude of telescope: {{ telescope.longitude }} </p>
+       <p>Extra info: {{ telescope.additionalInfo }}</p>
+      </div>
+      <div class="panel-footer">
+       <a href="{% url 'edit_telescope' telescope_id=telescope.id %}" class="btn btn-default">Edit telescope configuration</a>
+       <a href="{% url 'delete_telescope' telescope_id=telescope.id %}" class="btn btn-default">Remove telescope</a>
+      </div>
+     </div>
+     {% endfor %}
+     {% endif %}
+    </div>
+    <div class="panel-footer">
+      <a href="{% url 'add_telescope' %}" class="btn btn-default">Add a new telescope</a>
+    </div>
+   </div>
+{% endblock %}

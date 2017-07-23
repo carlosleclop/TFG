@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Home{% endblock %}
+
+{% block body_block %}
+<div class="page-header">
+
+{% if user.is_authenticated %}
+<h1> TRANSITWEB {{ user.username }} </h1>
+{% else %}
+<h1> TRANSITWEB </h1>
+{% endif %}
+</div>
+
+{% if occultation %}
+ <!--div class="col-md-12"-->
+  <div class="panel panel-default">
+   <div class="panel-heading">
+    <h3 class="panel-title">Occultation info</h3>
+   </div>
+   <div class="panel-body">
+    <p>Date: {{ occultation.datePrediction }}</p>
+    <p>Time: {{ occultation.timePrediction }}</p>
+    <p>Addtional info: {{ occultation.additionalInfo }} </p>
+   </div>
+  </div>
+  {% if occultation.adenda %}
+  <div class="panel panel-default">
+   <div class="panel-heading">
+    <h3 class="panel-title">Extended information</h3>
+   </div>
+   <div class="panel-body">
+    {{ occultation.adenda|safe }}
+   </div>
+  </div>
+  {% endif %}
+ <!--/div-->
+
+ <div class="row">
+  <div class="col-md-6">
+   <div class="panel panel-default">
+    <div class="panel-body">
+      {% if subs %}
+     <a href="">Unsubscribe</a>
+      {% else %}
+     <a href="subscribe/">Subscribe to this event</a>
+      {% endif %}
+    </div>
+   </div>
+  </div>
+  <div class="col-md-6 ">
+   <div class="panel panel-default">
+    <div class="panel-body">
+     <a href="">Subscribe to this event again</a>
+    </div>
+   </div>
+
+  </div>
+ </div>
+{% else %}
+We do not have this occultation in our system
+{% endif %}
+{% endblock %}

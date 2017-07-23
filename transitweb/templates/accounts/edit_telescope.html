@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Home{% endblock %}
+
+{% block body_block %}
+
+<h1>Edit Telescope</h1>
+<form method="POST" action="{% url 'edit_telescope' telescope_id=telescope_id %}" class="" >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Add occultation{% endblock %}
+
+{% block head_tag %}
+{{ form.media }}
+{% endblock %}
+
+{% block body_block %}
+
+<div class="page-header">
+
+{% if user.is_authenticated %}
+<h1> Add new occultation {{ user.username }} </h1>
+{% else %}
+<h1> Add new occultation </h1>
+{% endif %}
+</div>
+
+<form id="occult_form" method="post" class="form-horizontal" action="/management/add_occult/">
+
+{% csrf_token %}
+{% for hidden in form.hidden_fields %}
+{{ hidden }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+<div class="form-group">
+{{ field.errors }}
+<label class="control-label">{{ field.help_text }}</label>
+{{ field }}
+</div>
+{% endfor %}
+
+<input type="submit" name="submit" value="Create occultation" />
+
+</form>
+
+{% endblock %}
