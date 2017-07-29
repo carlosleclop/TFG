@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
-# Create your views here.
+from django.shortcuts import get_object_or_404
 
 def initialize_context(request):
     context_dict = {}
@@ -197,18 +197,42 @@ def register(request):
 def occult_page(request, occult_id):
     context_dict = initialize_context(request)
 
-    try:
-        occultation = Occultation.objects.get(id=occult_id)
-        context_dict["occultation"] = occultation
+    userObserver = get_UserObserver_from_request(request)
+    userAstronomer = get_UserAstronomer_from_request(request)
+    occultation = get_object_or_404(Occultation, id=occult_id)
+    context_dict["occultation"] = occultation
 
-    except Occultation.DoesNotExist:
-        pass
+    if request.method == 'GET':
+        userObserver = get_UserObserver_from_request(request)
+        if (userObserver != None):
+            if request.GET.get("action", None) == "subscribe":
+                occultation.usersGo.add(userObserver)
+            elif request.GET.get("action", None) == "unsubscribe":
+                try:
+                    occultation.usersGo.remove(userObserver)
+                except Exception:
+                    pass
+            for u in occultation.usersGo.all():
+                if u == userObserver:
+                    context_dict["subscribed"] = True
+        if (userAstronomer != None):
+            context_dict["attendees"] = occultation.usersGo.all()
 
     return render(request, "transitweb/occult.html", context_dict)
 
 @login_required
 def subscribe_occult(request, occult_id):
     context_dict = initialize_context(request)
+
+    occultation = get_object_or_404(Occultation, id=occult_id)
+    userObserver = get_UserObserver_from_request(request)
+    if (userObserver != None):
+        occultation.usersGo.add(userObserver)
+    else:
+        context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you do not have a telescope"
+    context_dict["occultation"] = occultation
+    return "ok"
+    #render(request, "transitweb/occult.html", context_dict)
 
     try:
         occultation = Occultation.objects.get(id=occult_id)
@@ -320,3 +344,8 @@ def edit_profile(request):
             "form": form
         }
         return render(request, "accounts/edit_profile.html", context)
+
+def see_profile(request, username):
+    context = initialize_context(request)
+    context["other_user"] = get_object_or_404(User, username=username)
+    return render(request, "profile/base_profile.html", context)

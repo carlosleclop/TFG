@@ -7,8 +7,8 @@ urlpatterns = [
     url(r'^management/add_telescope/$', views.add_telescope, name="add_telescope"),
     url(r'^management/add_occult/$', views.add_occult, name="add_occult"),
 
-    url(r'^occultation/(?P<occult_id>[\w\-]+)/$', views.occult_page, name="occultation"),
     url(r'^occultation/(?P<occult_id>[\w\-]+)/subscribe/$', views.subscribe_occult, name="subscribe"),
+    url(r'^occultation/(?P<occult_id>[\w\-]+)/$', views.occult_page, name="occultation"),
 
     url(r'^workspace/observer/$', views.workspace_observer, name='workspace_observer'),
     url(r'^workspace/astronomer/$', views.workspace_astronomer, name='workspace_astronomer'),
@@ -19,7 +19,9 @@ urlpatterns = [
     url(r'^accounts/register/$', views.register, name='register'),
     url(r'^accounts/update_profile/$', views.edit_profile, name='update_profile'),
     url(r'^accounts/edit_telescope/(?P<telescope_id>[\w\-]+)/$', views.edit_telescope, name='edit_telescope'),
-    url(r'^accounts/delete_telescope/(?P<telescope_id>[\w\-]+)/$', views.delete_telescope, name='delete_telescope')
+    url(r'^accounts/delete_telescope/(?P<telescope_id>[\w\-]+)/$', views.delete_telescope, name='delete_telescope'),
+
+    url(r'^user/(?P<username>[\w\-]+)/$', views.see_profile, name='see_profile')
 ]
 
 """

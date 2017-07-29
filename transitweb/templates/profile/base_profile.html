@@ -7,7 +7,7 @@
 {% block body_block %}
 
 <div class="page-header">
-<h1> Profile account: {{ user.username }} </h1>
+<h1> Profile account: {{ other_user.username }} </h1>
 </div>
 
  <div class="col-md-12">
@@ -21,9 +21,9 @@
        <h3 class="panel-title">User account settings</h3>
       </div>
       <div class="panel-body">
-<p>Username: {{ user.username }}</p>
-<p>E-mail: {% if user.email %} {{user.email}} {% else %} No e-mail added yet {% endif %}</p>
-<p>Date joined: {{user.date_joined}}</p>
+<p>Username: {{ other_user.username }}</p>
+<p>E-mail: {% if other_user.email %} {{user.email}} {% else %} No e-mail added yet {% endif %}</p>
+<p>Date joined: {{ other_user.date_joined }}</p>
       </div>
      </div>
      <div class="panel panel-info">
@@ -31,15 +31,17 @@
        <h3 class="panel-title">Personal information</h3>
       </div>
       <div class="panel-body">
-<p>First name: {% if user.first_name %} {{user.first_name}} {% else %} - {% endif %}</p>
-<p>Last name: {% if user.last_name %} {{user.last_name}} {% else %} - {% endif %}</p>
-<p>Website: {{ user.profile.website }}</p>
-<p>Birth date: {{ user.profile.birth_date }} </p>
-<p>Country: {{ user.profile.country }} </p>
-<p>Phone: {{ user.profile.phone }} </p>
-<p>Location: {{ user.profile.location }} </p>
-<p>Allow non-users get to the profile: {% if user.profile.public != True %} No {% else %} Yes {% endif %} </p>
-<p><a href="{% url 'update_profile' %}" class="btn btn-default">Change personal data</a></p>
+{% if other_user.profile.public %}
+<p>First name: {% if other_user.first_name %} {{ other_user.first_name }} {% else %} - {% endif %}</p>
+<p>Last name: {% if other_user.last_name %} {{ other_user.last_name }} {% else %} - {% endif %}</p>
+<p>Website: {{ other_user.profile.website }}</p>
+<p>Birth date: {{ other_user.profile.birth_date }} </p>
+<p>Country: {{ other_user.profile.country }} </p>
+<p>Phone: {{ other_user.profile.phone }} </p>
+<p>Location: {{ other_user.profile.location }} </p>
+{% else %}
+<p>Profile not public.</p>
+{% endif %}
       </div>
      </div>
 

@@ -88,3 +88,10 @@ class Subscription(models.Model):
     def __unicode__(self):
         return "no str info"
         return "Occultation: " + str(occultation) + ", user: " + str(telescope)
+
+class Result(models.Model):
+    telescope = models.ForeignKey(Telescope)
+    occultation = models.ForeignKey(Occultation)
+
+    def __unicode__(self):
+        return str("Result ID: " + id)

@@ -38,14 +38,15 @@
   {% endif %}
  <!--/div-->
 
+{% if userObserver %}
  <div class="row">
   <div class="col-md-6">
    <div class="panel panel-default">
     <div class="panel-body">
-      {% if subs %}
-     <a href="">Unsubscribe</a>
+      {% if not subscribed %}
+      <a href="?action=subscribe">Subscribe to this event</a>
       {% else %}
-     <a href="subscribe/">Subscribe to this event</a>
+     <a href="?action=unsubscribe">Unsubscribe to this event</a>
       {% endif %}
     </div>
    </div>
@@ -53,12 +54,27 @@
   <div class="col-md-6 ">
    <div class="panel panel-default">
     <div class="panel-body">
-     <a href="">Subscribe to this event again</a>
+     <a href="">Other info not available yet</a>
     </div>
    </div>
 
   </div>
  </div>
+ {% endif %}
+ {% if userAstronomer %}
+ <div class="panel panel-default">
+  <div class="panel-heading">
+   <h3 class="panel-title">Observers attending</h3>
+  </div>
+  <div class="panel-body">
+   <ul>
+    {% for attendee in attendees %}
+     <li><a href="/user/{{ attendee.user }}">{{ attendee }}</a></li>
+    {% endfor %}
+   </ul>
+  </div>
+ </div>
+ {% endif %}
 {% else %}
 We do not have this occultation in our system
 {% endif %}
