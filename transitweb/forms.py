@@ -41,7 +41,7 @@ class UserForm(forms.ModelForm):
 
 class UserProfileForm(forms.ModelForm):
     #website = forms.URLField(label="Website", required=False)
-    public = forms.BooleanField(label="Public profile account?")
+    public = forms.BooleanField(label="Public profile account?", required=False)
 
     class Meta:
         model = Profile
