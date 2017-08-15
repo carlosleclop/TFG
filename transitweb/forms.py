@@ -69,6 +69,15 @@ class EditTelescopeForm(forms.ModelForm):
         model = Telescope
         fields = ("mobile", "country", "latitude", "longitude", "additionalInfo")
 
+class AddResultForm(forms.ModelForm):
+    report = forms.CharField(help_text="Data report", widget=forms.Textarea(attrs={'cols': 40, 'rows': 20}))
+    adenda = forms.CharField(help_text="Other related information", required=False, widget=TinyMCE(attrs={'cols':40, 'rows':20}))
+    #telescope = forms.ChoiceField(choices=((1, "opcion 1"), (2, "opcion 2")))
+
+    class Meta:
+        model = Result
+        fields = ("report", "adenda")
+
 """
 class ChangeAccount(forms.ModelForm):
     username = forms.CharField(default)

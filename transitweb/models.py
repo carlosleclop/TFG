@@ -93,5 +93,8 @@ class Result(models.Model):
     telescope = models.ForeignKey(Telescope)
     occultation = models.ForeignKey(Occultation)
 
+    report = models.CharField(max_length=65535)
+    adenda = tinymce_models.HTMLField(null=True)
+
     def __unicode__(self):
-        return str("Result ID: " + id)
+        return str("Result ID: " + str(self.id))

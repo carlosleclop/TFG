@@ -18,29 +18,115 @@
  <div class="col-md-12">
   <div class="panel panel-primary">
    <div class="panel-heading">
-<span class="panel-title">Next occultations</span>
+     <div class="btn-group btn-group-justified" role="group">
+       <a class="btn btn-default" href="#" onclick="javascript:change_occults('all')" role="button">All occultations</a>
+       <a class="btn btn-default" href="#" onclick="javascript:change_occults('next')" role="button">Next occultations</a>
+       <a class="btn btn-default" href="#" onclick="javascript:change_occults('near')" role="button">Near occultations</a>
+       <a class="btn btn-default" href="#" onclick="javascript:change_occults('past')" role="button">Past occultations</a>
+       <a class="btn btn-default" href="#" onclick="javascript:change_occults('subs')" role="button">Subs occultations</a>
+     </div>
+     <br />
+     <span class="panel-title">Next occultations</span>
    </div>
    <div class="panel-body">
-<table class="table">
-<thead>
-<tr>
-<th>Location</th>
-<th>Date</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody>
-{% for o in occultations %}
-<tr>
-<td><a href="/occultation/{{ o.id }}">Access to page</a></td>
-<td>{{ o.datePrediction }}</td>
-<td>{{ o.timePrediction }}</td>
-</tr>
-{% endfor %}
-</tbody></table>
-</div>
+     <table class="table">
+       <thead>
+         <tr>
+           <th>Webpage</th>
+           <th>Date</th>
+           <th>Time</th>
+         </tr>
+       </thead>
+       <tbody class="hidden" id="all">
+         {% for o in all_occultations %}
+          <tr>
+            <td><a href="/occultation/{{ o.id }}">Access to page</a></td>
+            <td>{{ o.datePrediction }}</td>
+            <td>{{ o.timePrediction }}</td>
+          </tr>
+         {% endfor %}
+       </tbody>
+       <tbody id="next">
+         {% for o in next_occultations %}
+          <tr>
+            <td><a href="/occultation/{{ o.id }}">Access to page</a></td>
+            <td>{{ o.datePrediction }}</td>
+            <td>{{ o.timePrediction }}</td>
+          </tr>
+         {% endfor %}
+       </tbody>
+       <tbody class="hidden" id="near">
+         {% for o in near_occultations %}
+          <tr>
+            <td><a href="/occultation/{{ o.id }}">Access to page</a></td>
+            <td>{{ o.datePrediction }}</td>
+            <td>{{ o.timePrediction }}</td>
+          </tr>
+         {% endfor %}
+       </tbody>
+       <tbody class="hidden" id="past">
+         {% for o in past_occultations %}
+          <tr>
+            <td><a href="/occultation/{{ o.id }}">Access to page</a></td>
+            <td>{{ o.datePrediction }}</td>
+            <td>{{ o.timePrediction }}</td>
+          </tr>
+         {% endfor %}
+       </tbody>
+       <tbody class="hidden" id="subs">
+         {% for o in subs_occultations %}
+          <tr>
+            <td><a href="/occultation/{{ o.id }}">Access to page</a></td>
+            <td>{{ o.datePrediction }}</td>
+            <td>{{ o.timePrediction }}</td>
+          </tr>
+         {% endfor %}
+       </tbody>
+     </table>
+   </div>
 
   </div>
+  <div class="panel panel-info">
+   <div class="panel-heading">
+    <h3 class="panel-title">Telescopes</h3>
+   </div>
+   <div class="panel-body">
+
+     {% if userObserver.telescope_set %}
+     {% for telescope in userObserver.telescope_set.all %}
+     <div class="panel panel-info">
+      <div class="panel-body">
+       <p>Mobile telescope: {{ telescope.mobile }}</p>
+       <p>Country: {{ telescope.country }}</p>
+       <p>Latitude of telescope: {{ telescope.latitude }}  </p>
+       <p>Longitude of telescope: {{ telescope.longitude }} </p>
+       <p>Extra info: {{ telescope.additionalInfo }}</p>
+      </div>
+      <div class="panel-footer">
+       <a href="{% url 'edit_telescope' telescope_id=telescope.id %}" class="btn btn-default">Edit telescope configuration</a>
+       <a href="{% url 'delete_telescope' telescope_id=telescope.id %}" class="btn btn-default">Remove telescope</a>
+      </div>
+     </div>
+     {% endfor %}
+     {% endif %}
+    </div>
+    <div class="panel-footer">
+      <a href="{% url 'add_telescope' %}" class="btn btn-default">Add a new telescope</a>
+    </div>
+   </div>
  </div>
 
+{% endblock %}
+
+{% block masscripts %}
+<script type="text/javascript">
+function change_occults(whichOne){
+  $("#all").addClass("hidden")
+  $("#next").addClass("hidden")
+  $("#near").addClass("hidden")
+  $("#past").addClass("hidden")
+  $("#subs").addClass("hidden")
+  $("#" + whichOne).removeClass("hidden")
+}
+</script>
 {% endblock %}

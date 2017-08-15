@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
 def initialize_context(request):
     context_dict = {}
@@ -42,6 +43,12 @@ def index_alert(request, alert):
 @login_required
 def workspace_observer(request):
     context_dict = initialize_context(request)
+    all_occultations = Occultation.objects.order_by("-datePrediction").reverse()
+    context_dict["next_occultations"] = Occultation.objects.filter(datePrediction__gte = now()).order_by("-datePrediction").reverse()
+    context_dict["near_occultations"] = Occultation.objects.order_by("-datePrediction").reverse()
+    context_dict["past_occultations"] = Occultation.objects.filter(datePrediction__lte = now()).order_by("-datePrediction")
+    context_dict["subs_occultations"] = Occultation.objects.filter(usersGo=context_dict.get("userObserver")).order_by("-datePrediction").reverse()
+    context_dict["all_occultations"] = Occultation.objects.order_by("-datePrediction").reverse()
     return render(request, "workspace/observer.html", context_dict)
 
 @login_required
@@ -116,15 +123,7 @@ def get_UserAstronomer_from_request(request):
 @login_required
 def user_profile(request):
     context_dict = initialize_context(request)
-    if context_dict.get("userObserver") != None:
-        return render(request,
-                "accounts/profile_observer.html",
-                context_dict)
-    elif context_dict.get("userAstronomer") != None:
-        return render(request,
-                "accounts/profile_astronomer.html",
-                context_dict)
-    return render(request, "accounts/base_profile.html", context_dict)
+    return render(request, "accounts/profile.html", context_dict)
 
 def user_login(request):
     # If the request is a HTTP POST, try to pull out the relevant information.
@@ -200,6 +199,7 @@ def occult_page(request, occult_id):
     userObserver = get_UserObserver_from_request(request)
     userAstronomer = get_UserAstronomer_from_request(request)
     occultation = get_object_or_404(Occultation, id=occult_id)
+
     context_dict["occultation"] = occultation
 
     if request.method == 'GET':
@@ -349,3 +349,39 @@ def see_profile(request, username):
     context = initialize_context(request)
     context["other_user"] = get_object_or_404(User, username=username)
     return render(request, "profile/base_profile.html", context)
+
+@login_required
+def add_result(request, occult_id, telescope_id):
+    context_dict = initialize_context(request)
+    context_dict["occult_id"] = occult_id
+    context_dict["telescope_id"] = telescope_id
+    telescope = get_object_or_404(Telescope, id=telescope_id)
+    occult = get_object_or_404(Occultation, id=occult_id)
+
+    if request.method == 'POST':
+        form = AddResultForm(data=request.POST)
+
+        if form.is_valid():
+
+            result_object = form.save(commit = False)
+            result_object.telescope = telescope
+            result_object.occultation = occult
+            result_object.save()
+            #user.set_password(user.password)
+            #user.save()
+
+            #occult_page(request, occult_id)
+            #return (request, 'transitweb/occult_id.html', context_dict)
+            return workspace_observer(request)
+            #return HttpResponseRedirect('%s/%s'%(reverse('occultation'), str(occult_id)) )
+
+        else:
+            print result.errors
+
+    else:
+        form = AddResultForm()
+
+
+    context_dict["form"] = form
+    # Render the template depending on the context.
+    return render(request, 'management/add_result.html', context_dict)

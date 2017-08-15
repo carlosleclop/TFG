@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^management/add_occult/$', views.add_occult, name="add_occult"),
 
     url(r'^occultation/(?P<occult_id>[\w\-]+)/subscribe/$', views.subscribe_occult, name="subscribe"),
+    url(r'^occultation/send/(?P<occult_id>[\w\-]+)/(?P<telescope_id>[\w\-]+)$', views.add_result, name="add_result"),
     url(r'^occultation/(?P<occult_id>[\w\-]+)/$', views.occult_page, name="occultation"),
 
     url(r'^workspace/observer/$', views.workspace_observer, name='workspace_observer'),

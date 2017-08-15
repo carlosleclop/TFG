@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <title>Transitweb - {% block title %}{% endblock%}</title>
-<link href="https://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!--link href="https://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"-->
+<link href="https://getbootstrap.com/docs/3.3/examples/dashboard/dashboard.css" rel="stylesheet">
 {% block head_tag %}{% endblock %}
 </head>
 <body>
@@ -40,8 +41,149 @@
 
 <div class="container">
  <div class="row">
-  <div class="col-md-3">
-    <!-- before: div class="col-md-3"-->
+  <div class="col-md-3" style="padding-top: 50px;">
+    <div class="panel-group" id="accordion">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"><span class="glyphicon glyphicon-home">
+                    </span>General</a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star text-primary"></span><a href="PENDIENTE">Coming occultations</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree"><span class="glyphicon glyphicon-user">
+                    </span>Account</a>
+                </h4>
+            </div>
+            {% if user.is_authenticated %}
+            <div id="collapseThree" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                              <span class="glyphicon glyphicon-warning-sign"></span><a href="PENDIENTE"><b>Notifications</b></a> <span class="label label-info">5</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-user"></span><a href="PENDIENTE">Profile</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-envelope"></span><a href="PENDIENTE">Messages</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-log-out text-danger"></span><a href="PENDIENTE" class="text-danger">
+                                    Log out</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div id="collapseThree" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-log-in"></span><a href="PENDIENTE" class="text-danger">
+                                    Log in</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if userObserver %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
+                    </span>Observer menu</a>
+                </h4>
+            </div>
+            <div id="collapseFour" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-list-alt"></span><a href="PENDIENTE">Workspace</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star"></span><a href="PENDIENTE">Subscribed occultations</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">Near occultations</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">All occultations</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if userAstronomer %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
+                    </span>Astronomer menu</a>
+                </h4>
+            </div>
+            <div id="collapseFour" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-list-alt"></span><a href="PENDIENTE">Workspace</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">All occultations</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">Add occultations</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
    {% block side_block %}{% endblock %}
   </div>
   <div class="col-md-9 main">

@@ -8,5 +8,6 @@ admin.site.register(Occultation)
 admin.site.register(UserObserver)
 admin.site.register(UserAstronomer)
 admin.site.register(Profile)
+admin.site.register(Result)
 
 # Register your models here.

@@ -54,7 +54,13 @@
   <div class="col-md-6 ">
    <div class="panel panel-default">
     <div class="panel-body">
-     <a href="">Other info not available yet</a>
+      <ul>
+      {% if userObserver.telescope_set %}
+       {% for telescope in userObserver.telescope_set.all %}
+     <li><a href="/occultation/send/{{ occultation.id }}/{{ telescope.id }}">Send result with telescope {{ telescope }}</a></li>
+       {% endfor %}
+      {% endif %}
+     </ul>
     </div>
    </div>
 
