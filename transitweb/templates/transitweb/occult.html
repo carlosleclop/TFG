@@ -2,17 +2,10 @@
 
 {% load staticfiles %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Occultation{% endblock %}
+{% block heading %}Occultation{% endblock %}
 
 {% block body_block %}
-<div class="page-header">
-
-{% if user.is_authenticated %}
-<h1> TRANSITWEB {{ user.username }} </h1>
-{% else %}
-<h1> TRANSITWEB </h1>
-{% endif %}
-</div>
 
 {% if occultation %}
  <!--div class="col-md-12"-->
@@ -35,8 +28,29 @@
     {{ occultation.adenda|safe }}
    </div>
   </div>
+  {% if occultation.attachedImage %}
+  <div class="panel panel-default">
+   <div class="panel-heading">
+    <h3 class="panel-title">Attached image</h3>
+   </div>
+   <div class="panel-body">
+     <p><img class="img-responsive" src="{% static occultation.attachedImage.url %}"></p>
+     <p><a href="{% static occultation.attachedImage.url %}" target="_blank">Open image in a new window</a></p>
+   </div>
+  </div>
   {% endif %}
- <!--/div-->
+  {% if occultation.attachedFile %}
+  <div class="panel panel-default">
+   <div class="panel-heading">
+    <h3 class="panel-title">Attached file</h3>
+   </div>
+   <div class="panel-body">
+    <a href="{{ occultation.attachedFile.url }}" target="_blank">Download link, please be careful with this content.</a>
+   </div>
+  </div>
+  {% endif %}
+
+{% endif %}
 
 {% if userObserver %}
  <div class="row">
@@ -55,9 +69,9 @@
    <div class="panel panel-default">
     <div class="panel-body">
       <ul>
-      {% if userObserver.telescope_set %}
-       {% for telescope in userObserver.telescope_set.all %}
-     <li><a href="/occultation/send/{{ occultation.id }}/{{ telescope.id }}">Send result with telescope {{ telescope }}</a></li>
+      {% if userObserver.equipment_set %}
+       {% for equipment in userObserver.equipment_set.all %}
+     <li><a href="/occultation/send/{{ occultation.id }}/{{ equipment.id }}">Send result with equipment {{ equipment }}</a></li>
        {% endfor %}
       {% endif %}
      </ul>
@@ -66,22 +80,101 @@
 
   </div>
  </div>
- {% endif %}
- {% if userAstronomer %}
- <div class="panel panel-default">
-  <div class="panel-heading">
-   <h3 class="panel-title">Observers attending</h3>
-  </div>
-  <div class="panel-body">
-   <ul>
-    {% for attendee in attendees %}
-     <li><a href="/user/{{ attendee.user }}">{{ attendee }}</a></li>
-    {% endfor %}
-   </ul>
-  </div>
- </div>
- {% endif %}
-{% else %}
-We do not have this occultation in our system
 {% endif %}
+
+{% if userAstronomer %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Attending observers</h3>
+    </div>
+    <div class="panel-body">
+      <ul>
+        {% for attendee in attendees %}
+          <li><a href="/user/{{ attendee.user }}">{{ attendee }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% if attendees %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><b>Map</b> of attending observers' equipments</h3>
+      </div>
+      <div id="map">Map will be loaded here</div>
+      <div class="panel-footer">
+        Listed attendees and their equipments:
+        <ul>
+          {% for attendee in attendees %}
+            {% for equip in attendee.equipment_set.all %}
+              <li><a href="/user/{{ attendee.user }}">{{ attendee }}: {{ equip }}</a></li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  {% endif %}
+{% endif %}
+{% else %}
+  We do not have this occultation in our system
+{% endif %}
+{% endblock %}
+
+{% block masscripts %}
+<script>
+var preMarker;
+var json_data = {{ json_data|safe }}
+function initMap() {
+  var myLatlng = {
+    lat: 0,
+    lng: 0
+  };
+
+  var map = new google.maps.Map(
+    document.getElementById("map"),
+    {
+      zoom: 2,
+      center: myLatlng
+    }
+  );
+  for (i = 0; i < json_data.length; i++){
+    attendee = json_data[i];
+    for (j = 0; j < attendee["equipments"].length; j++){
+      equipment = attendee["equipments"][j];
+      new google.maps.Marker({
+        position: {
+          lat: parseFloat(equipment["lat"]),
+          lng: parseFloat(equipment["lng"])},
+        map: map
+      });
+    }
+  }
+/*
+  map.addListener('click', function(e){
+    placeMarkerAndPanTo(e.latLng, map);
+  });*/
+}
+
+function placeMarkerAndPanTo(latlng, map){
+  var marker = new google.maps.Marker({
+    position: latlng,
+    map: map
+  });
+  if (preMarker != undefined){
+    preMarker.setMap(null);
+  }
+  preMarker = marker;
+  document.getElementById("id_latitude").value = latlng.lat();
+  document.getElementById("id_longitude").value = latlng.lng();
+}
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBn9s1CrT7tMwGFpXXOMz1YJiefh8LYFCU&callback=initMap" async defer></script>
+
+
+<style>
+#map {
+  height: 400px;
+}
+</style>
 {% endblock %}

@@ -1,24 +1,41 @@
-from django.shortcuts import render
 from transitweb.models import *
 from transitweb.forms import *
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+
+import json
+
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth.decorators import login_required
 from django.utils.timezone import now
+from django.utils.translation import ugettext as _
 
 def initialize_context(request):
     context_dict = {}
-    userObserver = get_UserObserver_from_request(request)
-    userAstronomer = get_UserAstronomer_from_request(request)
     occultation_list = Occultation.objects.order_by("-datePrediction")[:20]
 
-    if userObserver != None:
-        context_dict["userObserver"] = userObserver
-    if userAstronomer != None:
-        context_dict["userAstronomer"] = userAstronomer
     context_dict["occultations"] = occultation_list
+
+    if request.user.is_authenticated():
+    #user = get_user(request)
+        userObserver = get_UserObserver_from_request(request)
+        userAstronomer = get_UserAstronomer_from_request(request)
+
+        notifs = Notification.objects.filter(receiver = request.user)
+        notifs_unread = notifs.filter(read = False)
+        notifs_read = notifs.filter(read = True)
+        context_dict["notifications_unread"] = notifs_unread
+        #context_dict["notifications_unread"] = notifs_unread
+        context_dict["notifications_read"] = notifs_read
+
+        context_dict["notifications"] = notifs
+        context_dict["notifications_count"] = len(notifs)
+
+        if userObserver != None:
+            context_dict["userObserver"] = userObserver
+        if userAstronomer != None:
+            context_dict["userAstronomer"] = userAstronomer
 
     return context_dict
 
@@ -34,10 +51,14 @@ def index(request):
     context_dict = standard_index(request)
     return render(request, "transitweb/index.html", context_dict)
 
+def index_nice_alert(request, alert):
+    context_dict = standard_index(request)
+    context_dict["a_nice_alert"] = alert
+    return render(request, "transitweb/index.html", context_dict)
+
 def index_alert(request, alert):
     context_dict = standard_index(request)
     context_dict["an_alert"] = alert
-
     return render(request, "transitweb/index.html", context_dict)
 
 @login_required
@@ -54,52 +75,66 @@ def workspace_observer(request):
 @login_required
 def workspace_astronomer(request):
     context_dict = initialize_context(request)
-    return render(request, "workspace/astronomer.html", context_dict)
+
+    userAstronomer = context_dict.get("userAstronomer")
+    if userAstronomer != None:
+        context_dict["own_occults"] = Occultation.objects.filter(reporter = userAstronomer)
+        return render(request, "workspace/astronomer.html", context_dict)
+
+    return index_alert(request, "We are sorry, only authorized accounts can perform this action")
 
 @login_required
 def add_occult(request):
+    context_dict = initialize_context(request)
+
     userAstronomer = get_UserAstronomer_from_request(request)
     # HTTP POST
     if userAstronomer == None:
         return index_alert(request, "We are sorry, only authorized accounts can perform this action")
     else:
         if request.method == "POST":
-            form = OccultationForm(request.POST)
+            form = OccultationForm(request.POST, request.FILES)
 
             if form.is_valid():
                 ocu = form.save(commit=False)
+                ocu.reporter = userAstronomer
                 ocu.save()
+                Notification.objects.send_notification_to_observers(
+                        link = "/occultation/%s" % str(ocu.id))
                 return index(request)
             else:
                 print form.errors
         else:
             form = OccultationForm()
 
-        return render(request, "management/add_occult.html", {"form": form})
+        context_dict["form"] = form
+        return render(request, "management/add_occult.html", context_dict)
 
 @login_required
-def add_telescope(request):
+def add_equipment(request):
+    context_dict = initialize_context(request)
+
     userObserver = get_UserObserver_from_request(request)
     # HTTP POST
     if userObserver != None:
         if request.method == "POST":
-            form = TelescopeForm(request.POST)
+            form = EquipmentForm(request.POST)
             # valid form?
             if form.is_valid():
                 tel = form.save(commit=False)
                 tel.user = userObserver
                 tel.save()
 
-                return HttpResponseRedirect('%s'%(reverse('user_profile')))
+                return HttpResponseRedirect('%s'%(reverse('workspace_observer')))
             else:
                 print form.errors
         else:
-            form = TelescopeForm()
+            form = EquipmentForm()
 
-        return render(request, "management/add_telescope.html", {"form": form})
+        context_dict["form"] = form
+        return render(request, "management/add_equipment.html", context_dict)
     else:
         return index_alert(request, "Error: you are not an observer.")
-
 
 @login_required
 def user_logout(request):
@@ -173,13 +208,10 @@ def register(request):
             profile = profile_form.save(commit=False)
             profile.user = user
 
-            """
-            if 'picture' in request.FILES:
-                profile.picture = request.FILES['picture']
-            """
             profile.save()
 
             registered = True
+            return index_nice_alert(request, "Welcome to Transitweb! You have been registered sucessfully.")
 
         else:
             print user_form.errors, profile_form.errors
@@ -189,9 +221,14 @@ def register(request):
         profile_form = UserProfileForm()
 
     # Render the template depending on the context.
-    return render(request,
+    return render(
+            request,
             'accounts/register.html',
-            {'user_form': user_form, 'profile_form': profile_form, 'registered': registered} )
+            {
+                'user_form': user_form,
+                'profile_form': profile_form,
+                'registered': registered
+            })
 
 def occult_page(request, occult_id):
     context_dict = initialize_context(request)
@@ -218,7 +255,25 @@ def occult_page(request, occult_id):
         if (userAstronomer != None):
             context_dict["attendees"] = occultation.usersGo.all()
 
+            json_data = equipments_to_json(context_dict["attendees"])
+            context_dict["json_data"] = json_data
+
     return render(request, "transitweb/occult.html", context_dict)
+
+def equipments_to_json(attendees):
+    json_object = []
+    for attendee in attendees:
+        attendee_object = {}
+        attendee_object["attendee"] = attendee.user.username
+        attendee_object["equipments"] = []
+        for equipment in attendee.equipment_set.all():
+            coord_object = {}
+            coord_object["lat"] = str(equipment.latitude)
+            coord_object["lng"] = str(equipment.longitude)
+            attendee_object["equipments"].append(coord_object)
+        json_object.append(attendee_object)
+    print json_object
+    return json.dumps(json_object)
 
 @login_required
 def subscribe_occult(request, occult_id):
@@ -229,7 +284,7 @@ def subscribe_occult(request, occult_id):
     if (userObserver != None):
         occultation.usersGo.add(userObserver)
     else:
-        context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you do not have a telescope"
+        context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you do not have equipment"
     context_dict["occultation"] = occultation
     return "ok"
     #render(request, "transitweb/occult.html", context_dict)
@@ -240,17 +295,17 @@ def subscribe_occult(request, occult_id):
 
         userObserver = get_UserObserver_from_request(request)
         if userObserver != None:
-            if userObserver.telescope != None:
-                telescope = userObserver.telescope
+            if userObserver.equipment != None:
+                equipment = userObserver.equipment
 
                 subs = Subscription.objects.create(
                         occultation = occultation,
-                        telescope = telescope,
+                        equipment = equipment,
                         additionalInfo = "Created")
                 context_dict["subs"] = subs
 
             else:
-                context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you do not have a telescope"
+                context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you do not have equipment"
         else:
             context_dict["an_alert"] = "Sorry, you cannot subscribe an event if you are not an observer"
 
@@ -260,15 +315,15 @@ def subscribe_occult(request, occult_id):
     return render(request, "transitweb/occult.html", context_dict)
 
 @login_required
-def delete_telescope(request, telescope_id):
+def delete_equipment(request, equipment_id):
     context_dict = initialize_context(request)
     user = request.user
     userObserver = get_UserObserver_from_request(request)
 
     if userObserver != None:
         try:
-            telescope = Telescope.objects.filter(id=telescope_id)[0]
-            telescope.delete()
+            equipment = Equipment.objects.filter(id=equipment_id)[0]
+            equipment.delete()
 
             return HttpResponseRedirect('%s'%(reverse('user_profile')))
         except Exception as e:
@@ -279,41 +334,41 @@ def delete_telescope(request, telescope_id):
     return index_alert(request, an_alert)
 
 @login_required
-def edit_telescope(request, telescope_id):
+def edit_equipment(request, equipment_id):
     context_dict = initialize_context(request)
     user = request.user
     userObserver = get_UserObserver_from_request(request)
     if userObserver != None:
         try:
-            telescope = Telescope.objects.filter(id=telescope_id)[0]
+            equipment = Equipment.objects.filter(id=equipment_id)[0]
 
             if request.method == 'POST':
-                form = EditTelescopeForm(request.POST)
+                form = EditEquipmentForm(request.POST)
                 if form.is_valid():
-                    telescope.delete()
-                    telescope = form.save(commit=False)
-                    telescope.user = userObserver
-                    telescope.save()
+                    equipment.delete()
+                    equipment = form.save(commit=False)
+                    equipment.user = userObserver
+                    equipment.save()
 
-                    return HttpResponseRedirect('%s'%(reverse('user_profile')))
+                    return HttpResponseRedirect('%s'%(reverse('workspace_observer')))
 
             else:
-                form = EditTelescopeForm(
-                        initial={'mobile': telescope.mobile,
-                                 'country': telescope.country,
-                                 'latitude': telescope.latitude,
-                                 'longitude': telescope.longitude,
-                                 'additionalInfo': telescope.additionalInfo})
+                form = EditEquipmentForm(
+                        initial={'mobile': equipment.mobile,
+                                 'country': equipment.country,
+                                 'latitude': equipment.latitude,
+                                 'longitude': equipment.longitude,
+                                 'additionalInfo': equipment.additionalInfo})
 
                 context_dict["form"] = form
-                context_dict["telescope_id"] = telescope_id
+                context_dict["equipment_id"] = equipment_id
 
-                return render(request, "accounts/edit_telescope.html", context_dict)
+                return render(request, "accounts/edit_equipment.html", context_dict)
 
         except Exception as e:
             an_alert = "Unexpected error: " + str(e)
     else:
-        an_alert = "You are no an observer"
+        an_alert = "You are not an observer"
 
     return index_alert(request, an_alert)
 
@@ -351,11 +406,11 @@ def see_profile(request, username):
     return render(request, "profile/base_profile.html", context)
 
 @login_required
-def add_result(request, occult_id, telescope_id):
+def add_result(request, occult_id, equipment_id):
     context_dict = initialize_context(request)
     context_dict["occult_id"] = occult_id
-    context_dict["telescope_id"] = telescope_id
-    telescope = get_object_or_404(Telescope, id=telescope_id)
+    context_dict["equipment_id"] = equipment_id
+    equipment = get_object_or_404(Equipment, id=equipment_id)
     occult = get_object_or_404(Occultation, id=occult_id)
 
     if request.method == 'POST':
@@ -364,12 +419,9 @@ def add_result(request, occult_id, telescope_id):
         if form.is_valid():
 
             result_object = form.save(commit = False)
-            result_object.telescope = telescope
+            result_object.equipment = equipment
             result_object.occultation = occult
             result_object.save()
-            #user.set_password(user.password)
-            #user.save()
-
             #occult_page(request, occult_id)
             #return (request, 'transitweb/occult_id.html', context_dict)
             return workspace_observer(request)
@@ -381,7 +433,52 @@ def add_result(request, occult_id, telescope_id):
     else:
         form = AddResultForm()
 
-
     context_dict["form"] = form
     # Render the template depending on the context.
     return render(request, 'management/add_result.html', context_dict)
+
+@login_required
+def see_result(request, result_id):
+    context_dict = initialize_context(request)
+
+    result = get_object_or_404(Result, id=result_id)
+    occultation = result.occultation
+    equipment = result.equipment
+    uploader = equipment.user
+
+    context_dict["result"] = result
+    context_dict["occultation"] = occultation
+    context_dict["equipment"] = equipment
+    context_dict["uploader"] = uploader
+
+    return render(request, 'transitweb/result.html', context_dict)
+
+@login_required
+def see_notifications(request):
+    context_dict = initialize_context(request)
+
+    return render(request, 'management/notifications.html', context_dict)
+
+@login_required
+def mark_as_read(request):
+    notif_id = None
+    if request.method == "GET":
+        notif_id = request.GET.get("notif_id")
+
+    if notif_id:
+        notif = Notification.objects.get(id = int(notif_id))
+        notif.read = True
+        notif.save()
+
+    return None
+
+@login_required
+def remove_notification(request):
+    notif_id = None
+    if request.method == "GET":
+        notif_id = request.GET.get("notif_id")
+
+    if notif_id:
+        notif = Notification.objects.get(id = int(notif_id))
+        notif.delete()
+    return None

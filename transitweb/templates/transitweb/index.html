@@ -3,17 +3,9 @@
 {% load staticfiles %}
 
 {% block title %}Home{% endblock %}
+{% block heading %}Homepage{% endblock %}
 
 {% block body_block %}
-
-<div class="page-header">
-
-{% if user.is_authenticated %}
-<h1> TRANSITWEB {{ user.username }} </h1>
-{% else %}
-<h1> TRANSITWEB </h1>
-{% endif %}
-</div>
 
  <div class="col-md-12">
   <div class="panel panel-primary">

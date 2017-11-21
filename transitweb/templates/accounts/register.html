@@ -3,17 +3,9 @@
 {% load staticfiles %}
 
 {% block title %}Register{% endblock %}
+{% block heading %}Register{% endblock %}
 
 {% block body_block %}
-
-<div class="page-header">
-
-{% if user.is_authenticated %}
-<h1> Register {{ user.username }} </h1>
-{% else %}
-<h1> Register new observer </h1>
-{% endif %}
-</div>
 
 {% if registered %}
 Registered!

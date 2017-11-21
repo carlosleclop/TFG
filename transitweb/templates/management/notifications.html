@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Notifications{% endblock %}
+{% block heading %}Notifications{% endblock %}
+
+{% block body_block %}
+
+<div class="row">
+  <div class="col-md-12">
+    {% if notifications_unread %}
+      <h2>Unread notifications</h2>
+      <ul class="list-group">
+        {% for notif in notifications_unread %}
+          <li class="list-group-item" id="unread{{ forloop.counter }}" class="unread_elements">
+            <h4 class="list-group-item-heading">{{ notif.subject }}</h4>
+            <p class="list-group-item-text">{{ notif.message|safe }}</p>
+            <hr>
+            <a class="btn btn-default marker" href="#" role="button" data-notifid="{{ notif.id }}">Mark as read</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <hr>
+    {% if notifications %}
+      <ul class="list-group">
+        {% for notif in notifications%}
+          <li class="list-group-item">
+            <h4 class="list-group-item-heading">
+              <a href="#item{{ forloop.counter}}" data-toggle="collapse" aria-expanded="false" aria-controls="item{{ forloop.counter}}">
+                {{ notif.subject }} <i>( {{ notif.datetime|date:"d/m/y H:i" }} )</i>
+              </a>
+            </h4>
+            <div class="collapse" id="item{{ forloop.counter }}">
+              <p class="list-group-item-text">{{ notif.message|safe }}</p>
+              <hr>
+              <a class="btn btn-default deleter" href="#" role="button" data-notifid="{{ notif.id }}">Delete</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      No notifications
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block masscripts %}
+<script>
+
+$(document).ready(function(){
+  $(".marker").click(function(){
+    $(this).parent().fadeTo(200, 0).slideUp(200);
+    var notif_id;
+    notif_id = $(this).attr("data-notifid");
+    $.get("{% url 'mark_as_read' %}", {notif_id: notif_id});
+  });
+  $(".deleter").click(function(){
+    $(this).parent().parent().fadeTo(200, 0).slideUp(200);
+    var notif_id;
+    notif_id = $(this).attr("data-notifid");
+    $.get("{% url 'remove_notification' %}", {notif_id: notif_id});
+  });
+});
+
+</script>
+{% endblock %}

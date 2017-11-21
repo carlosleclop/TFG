@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Add equipment{% endblock %}
+{% block heading %}Add new equipment{% endblock %}
+
+{% block body_block %}
+
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Map</h3>
+  </div>
+  <div class="panel-body">
+    <p>Select in the map the current location of your equipment. Be as accurate as possible.</p>
+    <div id="map">Map will be loaded here</div>
+  </div>
+</div>
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Information</h3>
+  </div>
+  <div class="panel-body">
+    <form id="equipment_form" method="post"  action="/management/add_equipment/">
+      {% csrf_token %}
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+      {% for field in form.visible_fields %}
+        <div class="form-group">
+          {{ field.errors }}
+          <label for="{{ field.id_for_label }}">{{ field.help_text }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+      <input type="submit" name="submit" value="Create equipment" />
+    </form>
+  </div>
+</div>
+
+<script>
+var preMarker;
+function initMap() {
+  var myLatlng = {
+    lat: 0,
+    lng: 0
+  };
+
+  var map = new google.maps.Map(
+    document.getElementById("map"),
+    {
+      zoom: 4,
+      center: myLatlng
+    }
+  );
+
+  map.addListener('click', function(e){
+    placeMarkerAndPanTo(e.latLng, map);
+  });
+}
+
+function placeMarkerAndPanTo(latlng, map){
+  var marker = new google.maps.Marker({
+    position: latlng,
+    map: map
+  });
+  if (preMarker != undefined){
+    preMarker.setMap(null);
+  }
+  preMarker = marker;
+  document.getElementById("id_latitude").value = latlng.lat();
+  document.getElementById("id_longitude").value = latlng.lng();
+}
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBn9s1CrT7tMwGFpXXOMz1YJiefh8LYFCU&callback=initMap" async defer></script>
+{% endblock %}
+
+{% block masscripts %}
+<style>
+#map {
+  height: 400px;
+}
+</style>
+
+{% endblock %}

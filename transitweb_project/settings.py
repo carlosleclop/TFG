@@ -83,6 +83,9 @@ STATIC_URL = '/static/'
 TEMPLATE_PATH = os.path.join(BASE_DIR, "templates")
 TEMPLATE_DIRS = (TEMPLATE_PATH, )
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
+
 REGISTRATION_OPEN = True
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_AUTO_LOING = True

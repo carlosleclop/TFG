@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Result{% endblock %}
+{% block heading %}Result{% endblock %}
+
+{% block body_block %}
+
+<div class="row">
+  <div class="col-md-8">
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Event info</h3>
+      </div>
+      <div class="panel-body">
+        <p>URL: <a href="/occultation/{{ occultation.id }}">Go to occultation webpage</a>
+        <p>Date: {{ occultation.datePrediction }}</p>
+        <p>Time: {{ occultation.timePrediction }}</p><hr />
+        <p>Addtional info: {{ occultation.additionalInfo }} </p><hr />
+        <p>Addtional HTML info: {{ occultation.adenda|safe }} </p><hr />
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Result info</h3>
+      </div>
+      <div class="panel-body">
+        <p>Report by the observer: {{ result.report }}</p><hr />
+        <p>Additional HTML info: {{ result.adenda|safe }}</p><hr />
+      </div>
+    </div>
+
+  </div>
+  <div class="col-md-4">
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Equipment info</h3>
+      </div>
+      <div class="panel-body">
+        <p>Mobile equipment: {% if equipment.mobile %}Yes{% else %}No{% endif %}
+        <p>Equipment info: {{ equipment.additionalInfo }}</p>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">User info</h3>
+      </div>
+      <div class="panel-body">
+        <p>URL: <a href="/user/{{ uploader.user }}">{{ uploader.user }}</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -2,7 +2,8 @@
 
 {% load staticfiles %}
 
-{% block title %}Add occultation{% endblock %}
+{% block title %}Add result{% endblock %}
+{% block heading %}Add result{% endblock %}
 
 {% block head_tag %}
 {{ form.media }}
@@ -10,16 +11,7 @@
 
 {% block body_block %}
 
-<div class="page-header">
-
-{% if user.is_authenticated %}
-<h1> Add new result {{ user.username }} </h1>
-{% else %}
-<h1> Add new result </h1>
-{% endif %}
-</div>
-
-<form id="occult_form" method="post" class="form-horizontal" action="/occultation/send/{{ occult_id }}/{{ telescope_id }}">
+<form id="occult_form" method="post" class="form-horizontal" action="/occultation/send/{{ occult_id }}/{{ equipment_id }}">
 
 {% csrf_token %}
 {% for hidden in form.hidden_fields %}

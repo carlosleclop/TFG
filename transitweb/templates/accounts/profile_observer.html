@@ -2,34 +2,34 @@
 
 {% load staticfiles %}
 
-{% block profile_panel_telescope %}
+{% block profile_panel_equipment %}
 
   <div class="panel panel-info">
    <div class="panel-heading">
-    <h3 class="panel-title">Telescopes</h3>
+    <h3 class="panel-title">Equipments</h3>
    </div>
    <div class="panel-body">
 
-     {% if userObserver.telescope_set %}
-     {% for telescope in userObserver.telescope_set.all %}
+     {% if userObserver.equipment_set %}
+     {% for equipment in userObserver.equipment_set.all %}
      <div class="panel panel-info">
       <div class="panel-body">
-       <p>Mobile telescope: {{ telescope.mobile }}</p>
-       <p>Country: {{ telescope.country }}</p>
-       <p>Latitude of telescope: {{ telescope.latitude }}  </p>
-       <p>Longitude of telescope: {{ telescope.longitude }} </p>
-       <p>Extra info: {{ telescope.additionalInfo }}</p>
+       <p>Mobile equipment: {{ equipment.mobile }}</p>
+       <p>Country: {{ equipment.country }}</p>
+       <p>Latitude of equipment: {{ equipment.latitude }}  </p>
+       <p>Longitude of equipment: {{ equipment.longitude }} </p>
+       <p>Extra info: {{ equipment.additionalInfo }}</p>
       </div>
       <div class="panel-footer">
-       <a href="{% url 'edit_telescope' telescope_id=telescope.id %}" class="btn btn-default">Edit telescope configuration</a>
-       <a href="{% url 'delete_telescope' telescope_id=telescope.id %}" class="btn btn-default">Remove telescope</a>
+       <a href="{% url 'edit_equipment' equipment_id=equipment.id %}" class="btn btn-default">Edit equipment configuration</a>
+       <a href="{% url 'delete_equipment' equipment_id=equipment.id %}" class="btn btn-default">Remove equipment</a>
       </div>
      </div>
      {% endfor %}
      {% endif %}
     </div>
     <div class="panel-footer">
-      <a href="{% url 'add_telescope' %}" class="btn btn-default">Add a new telescope</a>
+      <a href="{% url 'add_equipment' %}" class="btn btn-default">Add new equipment</a>
     </div>
    </div>
 {% endblock %}

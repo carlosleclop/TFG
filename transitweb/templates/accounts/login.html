@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Log in{% endblock %}
+{% block heading %}Log in{% endblock %}
 
 {% block body_block %}
-<h1>Login</h1>
 
  <form id="login_form" method="post" action="/accounts/login/">
     {% csrf_token %}

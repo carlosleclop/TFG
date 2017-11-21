@@ -14,21 +14,38 @@ class OccultationForm(forms.ModelForm):
     #usersGo = forms.ManyToManyField(UserObserver)
     #location = forms.ForeignKey(Location)
     adenda = forms.CharField(widget=TinyMCE(attrs={'cols':80, 'rows':30}))
-
+    attachedImage = forms.FileField(required = False)
+    attachedFile = forms.ImageField(required = False)
     class Meta:
         model = Occultation
-        fields = ("datePrediction", "timePrediction", "additionalInfo", "adenda")
+        fields = ("datePrediction", "timePrediction", "additionalInfo", "adenda", "attachedImage", "attachedFile")
 
-class TelescopeForm(forms.ModelForm):
-    latitude = forms.DecimalField(max_digits=13, decimal_places=10, help_text="Latitude")
-    longitude = forms.DecimalField(max_digits=13, decimal_places=10, help_text="Longitude")
-    country = forms.CharField(max_length=128, help_text="Country")
-
-    mobile = forms.BooleanField(help_text="Is a mobile telescope?", required=False)
-    additionalInfo = forms.CharField(max_length=128, help_text="Additional info", required=False)
+class EquipmentForm(forms.ModelForm):
+    latitude = forms.DecimalField(
+            max_digits=22,
+            decimal_places=18,
+            help_text="Latitude (from the map)",
+            widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    longitude = forms.DecimalField(
+            max_digits=22,
+            decimal_places=18,
+            help_text="Longitude (from the map)",
+            widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    country = forms.CharField(
+            max_length=128,
+            help_text="Country",
+            widget=forms.TextInput(attrs={'class': 'form-control'}))
+    mobile = forms.BooleanField(
+            help_text="Is a mobile equipment? (select for mobile, no select for static)",
+            required=False)
+    additionalInfo = forms.CharField(
+            max_length=128,
+            help_text="Additional info",
+            required=False,
+            widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
-        model = Telescope
+        model = Equipment
         fields = ("latitude", "longitude",
                   "country", "mobile", "additionalInfo")
 
@@ -58,7 +75,7 @@ class EditProfileForm(forms.ModelForm):
         model = Profile
         fields = ("website", "birth_date", "country", "phone", "public")
 
-class EditTelescopeForm(forms.ModelForm):
+class EditEquipmentForm(forms.ModelForm):
     mobile = forms.BooleanField(required=False)
     country = forms.CharField(required=False)
     latitude = forms.DecimalField(required=False)
@@ -66,7 +83,7 @@ class EditTelescopeForm(forms.ModelForm):
     additionalInfo = forms.CharField(required=False)
 
     class Meta:
-        model = Telescope
+        model = Equipment
         fields = ("mobile", "country", "latitude", "longitude", "additionalInfo")
 
 class AddResultForm(forms.ModelForm):

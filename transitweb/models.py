@@ -18,13 +18,16 @@ class Location(models.Model):
     def __unicode__(self):
         return unicode(unicode(self.latitude) + "," + unicode(self.longitude))
 
-class Telescope(models.Model):
+class Equipment(models.Model):
     mobile = models.BooleanField(default=False)
     country = models.CharField(max_length=128, null=True)
-    latitude = models.DecimalField(max_digits=13, decimal_places=10, default=0)
-    longitude = models.DecimalField(max_digits=13, decimal_places=10, default=0)
-    additionalInfo = models.CharField(max_length=128, null=True)
-    # UserObserver isn't defined yet, "UserObserver" can be used in the same way
+    latitude = models.DecimalField(max_digits=22, decimal_places=18, default=0)
+    longitude = models.DecimalField(
+            max_digits=22,
+            decimal_places=18,
+            default=0)
+    additionalInfo = models.CharField(max_length=65535, null=True)
+    # UserObserver isn't defined yet, "UserObserver" can be used instead
     user = models.ForeignKey("UserObserver", null=True)
 
     def __unicode__(self):
@@ -47,9 +50,9 @@ class Profile(models.Model):
 class UserObserver(models.Model):
     user = models.OneToOneField(User)
 
-    def get_UserObserver_with_telescope(find_telescope):
+    def get_UserObserver_with_equipment(find_equipment):
         for u in UserObserver.objects.all():
-            if u.telescope == find_telescope:
+            if u.equipment == find_equipment:
                 return u
         return None
 
@@ -63,34 +66,31 @@ class UserAstronomer(models.Model):
         return self.user.username
 
 class Occultation(models.Model):
-    id = models.IntegerField(primary_key=True)
     datePrediction = models.DateField(default=now)
     timePrediction = models.TimeField(default=now)
     additionalInfo = models.CharField(max_length=128, null=True)
     usersGo = models.ManyToManyField(UserObserver, null=True)
-    #slug = models.SlugField(unique=True)
     adenda = tinymce_models.HTMLField(null=True)
+    reporter = models.ForeignKey(UserAstronomer, null=True)
 
-    def save(self, *args, **kwargs):
-        id = Occultation.objects.all().count()
-        #self.slug = slugify(str(self.id))
-        super(Occultation, self).save(*args, **kwargs)
+    attachedFile = models.FileField(null = True)
+    attachedImage = models.ImageField(null = True)
 
     def __unicode__(self):
         return unicode("Occultation " + unicode(self.additionalInfo))
 
 class Subscription(models.Model):
     occultation = models.ForeignKey(Occultation)
-    telescope = models.ForeignKey(Telescope)
+    equipment = models.ForeignKey(Equipment)
 
     additionalInfo = models.CharField(max_length=4096, null=True)
 
     def __unicode__(self):
         return "no str info"
-        return "Occultation: " + str(occultation) + ", user: " + str(telescope)
+        return "Occultation: " + str(occultation) + ", user: " + str(equipment)
 
 class Result(models.Model):
-    telescope = models.ForeignKey(Telescope)
+    equipment = models.ForeignKey(Equipment)
     occultation = models.ForeignKey(Occultation)
 
     report = models.CharField(max_length=65535)
@@ -98,3 +98,52 @@ class Result(models.Model):
 
     def __unicode__(self):
         return str("Result ID: " + str(self.id))
+
+class NotificationManager(models.Manager):
+    NEW_OCCULT_MESSAGE = {
+        "subject": "New occultation added",
+        "message": "A new occultation has been added to the system. <br><br>Please, have a look at it and do not hesitate to ask any question to the reporter. <br><br>Regards."
+    }
+
+    NEW_RESULT_MESSAGE = {
+        "subject": "New result of an occultation added",
+        "message": "An user has uploaded a new result to the system. <br><br>Please, consider having a look at it, just for check the format. <br><br>Regards."
+    }
+
+    def send_notification_to_observers(
+            self,
+            message = NEW_OCCULT_MESSAGE,
+            link = None):
+        for user in UserObserver.objects.all():
+            body = str(message.get("message"))
+            if link is not None:
+                body += "<br><br>Related link: <a href=\""
+                body += str(link)
+                body += "\">"
+                body += str(link) + "</a>"
+            self.create(
+                    receiver = user.user,
+                    subject = message.get("subject"),
+                    message = body,
+                    read = False)
+
+    def send_notification_to_astronomers(self):
+        pass
+
+    def send_notification_to_everyone(self):
+        pass
+
+    def send_notification_to_someone(self, user):
+        pass
+
+class Notification(models.Model):
+    receiver = models.ForeignKey(User)
+    subject = models.CharField(max_length=255)
+    message = models.CharField(max_length=65535, null=True)
+    read = models.BooleanField(default=False)
+    datetime = models.DateTimeField(auto_now=True)
+
+    objects = NotificationManager()
+
+    def __unicode__(self):
+        return str(str(self.receiver) + ": " + str(self.subject))

@@ -2,18 +2,10 @@
 
 {% load staticfiles %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Workspace{% endblock %}
+{% block heading %}Astronomer workspace{% endblock %}
 
 {% block body_block %}
-
-<div class="page-header">
-
-{% if user.is_authenticated %}
-<h1> TRANSITWEB {{ user.username }} </h1>
-{% else %}
-<h1> TRANSITWEB </h1>
-{% endif %}
-</div>
 
  <div class="col-md-12">
   <div class="panel panel-primary">
@@ -43,16 +35,24 @@
   </div>
   <div class="panel panel-info">
 
-   <div class="panel-heading">
+  <div class="panel-heading">
     <h3 class="panel-title">Occultations added</h3>
-   </div>
+  </div>
 
-   <div class="panel-body">
-    <p>Plenty of occults thank you</p>
-   </div>
-   <div class="panel-footer">
+  <div class="panel-body">
+    {% if own_occults %}
+      <ul>
+        {% for own_occult in own_occults %}
+          <li><a href="/occultation/{{ o.id }}"><b>Occult {{ own_occult }}</b></a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Zero occultations have been submitted</p>
+    {% endif %}
+  </div>
+  <div class="panel-footer">
     <p><a href="{% url 'add_occult' %}">Add more occults</a>
-   </div>
+  </div>
   </div>
  </div>
 

@@ -1,205 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Transitweb - {% block title %}{% endblock%}</title>
+<title>Transitweb - {% block title %}{% endblock %}</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <!--link href="https://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"-->
 <link href="https://getbootstrap.com/docs/3.3/examples/dashboard/dashboard.css" rel="stylesheet">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 {% block head_tag %}{% endblock %}
 </head>
 <body>
 
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
- <div class="container-fluid">
-  <div class="navbar-header">
-   <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-    <span class="sr-only">Toggle nav</span>
-    <span class="icon-bar"></span>
-   </button>
-   <a class="navbar-brand" href="/">Transit</a>
+  <div class="container-fluid">
+    <div class="navbar-header">
+     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle nav</span>
+      <span class="icon-bar"></span>
+     </button>
+     <a class="navbar-brand" href="/">Transit</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        {% if user.is_authenticated %}
+          {% if notifications_unread %}
+            <li><a href="{% url 'see_notifications' %}"><b>New notifications! <span class="badge">{{ notifications_unread|length }}</span></b></a></li>
+          {% endif %}
+          {% if userObserver %}
+            <li><a href="{% url 'workspace_observer' %}">Observer's workspace</a></li>
+          {% endif %}
+          {% if userAstronomer %}
+            <li><a href="{% url 'workspace_astronomer' %}">Astronomer's workspace</a></li>
+          {% endif %}
+          <li><a href="{% url 'user_profile' %}">Profile</a></li>
+          <li><a href="{% url 'logout' %}?next=/">Log out</a></li>
+          {% else %}
+          <li><a href="{% url 'register' %}">Register</a></li>
+          <li><a href="{% url 'login' %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
   </div>
-  <div class="navbar-collapse collapse">
-   <ul class="nav navbar-nav navbar-right">
-    <li><a href="{% url 'index' %}">Home</a></li>
-    {% if user.is_authenticated %}
-    {% if userObserver %}
-    <li><a href="{% url 'workspace_observer' %}">Observer's workspace</a></li>
-    {% endif %}
-    {% if userAstronomer %}
-    <li><a href="{% url 'workspace_astronomer' %}">Astronomer's workspace</a></li>
-    {% endif %}
-    <li><a href="{% url 'user_profile' %}">Profile</a></li>
-    <li><a href="{% url 'logout' %}?next=/">Log out</a></li>
-    {% else %}
-    <li><a href="{% url 'register' %}">Register</a></li>
-    <li><a href="{% url 'login' %}">Login</a></li>
-    {% endif %}
-   </ul>
-  </div>
- </div>
 </div>
 
 <div class="container">
- <div class="row">
-  <div class="col-md-3" style="padding-top: 50px;">
-    <div class="panel-group" id="accordion">
-
+  <div class="row">
+    <div class="col-md-3" style="padding-top: 50px;">
+      <!-- Start of lateral menu -->
+      <div class="panel-group" id="accordion">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"><span class="glyphicon glyphicon-home">
-                    </span>General</a>
-                </h4>
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"><span class="glyphicon glyphicon-home">
+              </span>&nbsp;General</a>
+            </h4>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <table class="table">
+                <tr>
+                  <td>
+                    <span class="glyphicon glyphicon-star text-primary"></span><a href="/">&nbsp;Coming occultations</a>
+                  </td>
+                </tr>
+              </table>
             </div>
-            <div id="collapseOne" class="panel-collapse collapse in">
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star text-primary"></span><a href="PENDIENTE">Coming occultations</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+          </div>
         </div>
 
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree"><span class="glyphicon glyphicon-user">
-                    </span>Account</a>
-                </h4>
-            </div>
-            {% if user.is_authenticated %}
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree"><span class="glyphicon glyphicon-user">
+              </span>&nbsp;Account</a>
+            </h4>
+          </div>
+          {% if user.is_authenticated %}
             <div id="collapseThree" class="panel-collapse collapse">
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <td>
-                              <span class="glyphicon glyphicon-warning-sign"></span><a href="PENDIENTE"><b>Notifications</b></a> <span class="label label-info">5</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-user"></span><a href="PENDIENTE">Profile</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-envelope"></span><a href="PENDIENTE">Messages</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-log-out text-danger"></span><a href="PENDIENTE" class="text-danger">
-                                    Log out</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+              <div class="panel-body">
+                <table class="table">
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-warning-sign"></span><a href="{% url 'see_notifications' %}">&nbsp;<b>Notifications</b></a>
+                      {% if notifications_unread %}
+                        <span class="label label-info">{{ notifications_unread|length }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-user"></span><a href="/accounts/profile">&nbsp;Profile</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-log-out text-danger"></span><a href="{% url 'logout' %}?next=/" class="text-danger">&nbsp;Log out</a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-            {% else %}
+          {% else %}
             <div id="collapseThree" class="panel-collapse collapse">
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-log-in"></span><a href="PENDIENTE" class="text-danger">
-                                    Log in</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+              <div class="panel-body">
+                <table class="table">
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-log-in"></span><a href="{% url 'login' %}" class="text-danger">&nbsp;Log in</a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-            {% endif %}
+          {% endif %}
         </div>
 
         {% if userObserver %}
-        <div class="panel panel-default">
+          <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
-                    </span>Observer menu</a>
-                </h4>
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
+                </span>&nbsp;Observer menu</a>
+              </h4>
             </div>
             <div id="collapseFour" class="panel-collapse collapse">
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-list-alt"></span><a href="PENDIENTE">Workspace</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star"></span><a href="PENDIENTE">Subscribed occultations</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">Near occultations</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">All occultations</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+              <div class="panel-body">
+                <table class="table">
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'workspace_observer' %}">&nbsp;Workspace</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-star"></span><a href="{% url 'workspace_observer' %}">&nbsp;Subscribed occultations</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-star-empty"></span><a href="{% url 'workspace_observer' %}">&nbsp;Near occultations</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-star-empty"></span><a href="{% url 'workspace_observer' %}">&nbsp;All occultations</a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-        </div>
+          </div>
         {% endif %}
 
         {% if userAstronomer %}
-        <div class="panel panel-default">
+          <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
-                    </span>Astronomer menu</a>
-                </h4>
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour"><span class="glyphicon glyphicon-file">
+                </span>&nbsp;Astronomer menu</a>
+              </h4>
             </div>
             <div id="collapseFour" class="panel-collapse collapse">
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-list-alt"></span><a href="PENDIENTE">Workspace</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">All occultations</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="glyphicon glyphicon-star-empty"></span><a href="PENDIENTE">Add occultations</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+              <div class="panel-body">
+                <table class="table">
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'workspace_astronomer' %}">&nbsp;Workspace</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-star-empty"></span><a href="{% url 'workspace_astronomer' %}">&nbsp;All occultations</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="glyphicon glyphicon-star-empty"></span><a href="{% url 'add_occult' %}">&nbsp;Add occultations</a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-        </div>
+          </div>
         {% endif %}
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive"><span class="glyphicon glyphicon-home">
+              </span>&nbsp;System</a>
+            </h4>
+          </div>
+          <div id="collapseFive" class="panel-collapse collapse">
+            <div class="panel-body">
+              <table class="table">
+                <tr>
+                  <td>
+                    <span class="glyphicon glyphicon-question-sign"></span><a href="PENDIENTE">&nbsp;Frequently Asked Questions (under construction)</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="glyphicon glyphicon-question-sign"></span><a href="PENDIENTE">&nbsp;Tutorial</a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End of lateral menu -->
+      {% block side_block %}{% endblock %}
     </div>
-   {% block side_block %}{% endblock %}
-  </div>
-  <div class="col-md-9 main">
-    {% if an_alert %}
+    <div class="col-md-9 main">
+      {% if an_alert %}
         <div class="alert alert-danger">
           {{ an_alert }}
         </div>
-    {% endif %}
-   {% block body_block %}{% endblock %}
+      {% endif %}
+      {% if a_nice_alert %}
+        <div class="alert alert-success">
+          {{ a_nice_alert }}
+        </div>
+      {% endif %}
+
+      <div class="page-header">
+        <h1><small>Transitweb </small><b>{% block heading %}{% endblock %}</b></h1>
+      </div>
+
+      {% block body_block %}{% endblock %}
+
+    </div>
   </div>
- </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="https://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="https://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 {% block masscripts %}{% endblock %}
 

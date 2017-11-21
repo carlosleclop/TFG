@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Edit equipment{% endblock %}
+{% block heading %}Edit equipment{% endblock %}
+
+{% block body_block %}
+
+<form method="POST" action="{% url 'edit_equipment' equipment_id=equipment_id %}" class="" >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}
